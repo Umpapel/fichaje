@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#0b6e4f">
+<title>Umpapel - Fichaje</title>
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background: #f4f5f7; color: #1d2330; }
+  .pant { display: none; min-height: 100vh; padding: 24px 16px; flex-direction: column; align-items: center; }
+  .pant.on { display: flex; }
+  h1 { font-size: 24px; margin: 8px 0 4px; text-align: center; }
+  .sub { color: #5b6475; font-size: 15px; margin-bottom: 16px; text-align: center; min-height: 20px; max-width: 420px; }
+  .aviso { background: #fff4d6; color: #7a5600; border-radius: 10px; padding: 8px 12px; font-size: 14px; margin-bottom: 12px; text-align: center; max-width: 420px; }
+  .logo { font-weight: 800; letter-spacing: 1px; color: #0b6e4f; font-size: 18px; margin-bottom: 8px; }
+  .puntos { display: flex; gap: 14px; margin: 18px 0; }
+  .punto { width: 18px; height: 18px; border-radius: 50%; border: 2px solid #0b6e4f; }
+  .punto.lleno { background: #0b6e4f; }
+  .teclado { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; width: 100%; max-width: 320px; }
+  .tecla { height: 68px; font-size: 28px; border: 0; border-radius: 14px; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.12); color: #1d2330; cursor: pointer; }
+  .tecla:active { background: #dfe7e3; }
+  .tecla.gris { background: transparent; box-shadow: none; font-size: 18px; color: #5b6475; }
+  .tipos { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 100%; max-width: 420px; }
+  .tipos.uno { grid-template-columns: 1fr; }
+  .tipo { height: 96px; border: 0; border-radius: 16px; font-size: 20px; font-weight: 700; color: #fff; cursor: pointer; }
+  .t-Entrada { background: #0b6e4f; } .t-Salida { background: #b3261e; }
+  .t-Inicio { background: #3d5a80; } .t-Fin { background: #6b4f9e; } .t-Retiro { background: #a15c00; }
+  .btn { width: 100%; max-width: 420px; height: 56px; border: 0; border-radius: 14px; font-size: 18px; font-weight: 700; background: #0b6e4f; color: #fff; margin-top: 12px; cursor: pointer; }
+  .btn.sec { background: #fff; color: #1d2330; box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+  .btn.link { background: transparent; color: #5b6475; font-size: 15px; font-weight: 600; height: 44px; text-decoration: underline; }
+  .btn:disabled { opacity: .5; }
+  .campo { width: 100%; max-width: 420px; height: 52px; font-size: 20px; border: 1px solid #ccd; border-radius: 12px; padding: 0 14px; margin-top: 10px; background: #fff; }
+  video, #previa { width: 100%; max-width: 420px; border-radius: 16px; background: #000; aspect-ratio: 4/3; object-fit: cover; }
+  video { transform: scaleX(-1); }
+  #previa { display: none; }
+  .ok { font-size: 72px; color: #0b6e4f; margin-top: 40px; }
+  .error { color: #b3261e; font-weight: 600; min-height: 22px; text-align: center; margin-top: 10px; max-width: 420px; }
+  .cargando { color: #5b6475; margin-top: 10px; min-height: 22px; text-align: center; }
+  .modal-fondo { position: fixed; inset: 0; background: rgba(0,0,0,.45); display: none; align-items: center; justify-content: center; padding: 16px; z-index: 10; }
+  .modal-fondo.on { display: flex; }
+  .modal { background: #fff; border-radius: 16px; padding: 20px; width: 100%; max-width: 420px; text-align: center; }
+  .modal p { font-size: 18px; margin: 4px 0 8px; }
+  .tabs { display: flex; gap: 8px; width: 100%; max-width: 900px; margin-bottom: 12px; }
+  .tab { flex: 1; height: 44px; border: 0; border-radius: 10px; background: #fff; font-size: 15px; font-weight: 600; cursor: pointer; }
+  .tab.on { background: #0b6e4f; color: #fff; }
+  .panel { width: 100%; max-width: 900px; }
+  .card { background: #fff; border-radius: 12px; padding: 12px; margin-bottom: 8px; box-shadow: 0 1px 2px rgba(0,0,0,.08); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .card .n { flex: 1 1 180px; font-weight: 600; }
+  .card .r { color: #5b6475; font-size: 13px; display: block; font-weight: 400; }
+  .card input { width: 80px; height: 40px; font-size: 18px; text-align: center; border: 1px solid #ccd; border-radius: 8px; }
+  .chico { height: 40px; padding: 0 12px; border: 0; border-radius: 8px; background: #0b6e4f; color: #fff; font-weight: 600; cursor: pointer; }
+  .chico.sec { background: #e8eaee; color: #1d2330; }
+  .filtros { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; align-items: center; }
+  .filtros input[type=date], .filtros select { height: 42px; border: 1px solid #ccd; border-radius: 8px; padding: 0 8px; font-size: 15px; flex: 1 1 140px; background: #fff; }
+  .filtros label { font-size: 14px; display: flex; gap: 6px; align-items: center; }
+  table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 12px; overflow: hidden; font-size: 14px; }
+  th, td { padding: 8px; border-bottom: 1px solid #eef; text-align: left; vertical-align: top; }
+  th { background: #eef3f1; }
+  td.obs { color: #a15c00; font-size: 13px; }
+  .tabla { overflow-x: auto; width: 100%; }
+  .alta input, .alta select { height: 42px; border: 1px solid #ccd; border-radius: 8px; padding: 0 8px; font-size: 15px; margin-bottom: 8px; width: 100%; }
+</style>
+</head>
+<body>
+
+<!-- 0. Equipo no registrado -->
+<div class="pant" id="p-registro">
+  <div class="logo">UMPAPEL</div>
+  <h1>Este equipo no está registrado</h1>
+  <div class="sub">Para fichar desde esta computadora o celular, un socio tiene que registrarlo una sola vez.</div>
+  <input class="campo" id="r-nombre" placeholder="Nombre del equipo (ej: PC Depósito)" maxlength="60">
+  <input class="campo" id="r-pin" type="password" inputmode="numeric" maxlength="4" placeholder="PIN de socio">
+  <button class="btn" onclick="registrarEquipo()">Registrar este equipo</button>
+  <div class="cargando" id="r-cargando"></div>
+  <div class="error" id="r-error"></div>
+</div>
+
+<!-- 1. PIN -->
+<div class="pant" id="p-pin">
+  <div class="logo">UMPAPEL</div>
+  <h1>Ingresá tu PIN</h1>
+  <div class="puntos" id="puntos"><div class="punto"></div><div class="punto"></div><div class="punto"></div><div class="punto"></div></div>
+  <div class="teclado" id="teclado"></div>
+  <div class="cargando" id="pin-cargando"></div>
+  <div class="error" id="pin-error"></div>
+</div>
+
+<!-- 2. Tipo -->
+<div class="pant" id="p-tipo">
+  <h1 id="saludo">Hola</h1>
+  <div class="sub" id="ultimo"></div>
+  <div class="aviso" id="olvido" style="display:none"></div>
+  <div class="tipos" id="tipos"></div>
+  <button class="btn link" id="btn-otra" onclick="mostrarTodos()">Otra opción (requiere socio)</button>
+  <button class="btn sec" id="btn-admin" style="display:none" onclick="abrirAdmin()">Panel de socios</button>
+  <button class="btn sec" onclick="reiniciar()">Cancelar</button>
+</div>
+
+<!-- 2b. Autorización de socio -->
+<div class="pant" id="p-autoriza">
+  <h1>Autorización de un socio</h1>
+  <div class="sub" id="aut-texto"></div>
+  <input class="campo" id="aut-pin" type="password" inputmode="numeric" maxlength="4" placeholder="PIN de socio">
+  <button class="btn" onclick="confirmarAutoriza()">Autorizar</button>
+  <button class="btn sec" onclick="reiniciar()">Cancelar</button>
+  <div class="error" id="aut-error"></div>
+</div>
+
+<!-- 2c. Motivo de retiro -->
+<div class="pant" id="p-motivo">
+  <h1>Motivo del retiro</h1>
+  <div class="sub">Elegí el motivo</div>
+  <div class="tipos uno">
+    <button class="tipo t-Retiro" onclick="elegirMotivo('Enfermedad')">Enfermedad</button>
+    <button class="tipo t-Retiro" onclick="elegirMotivo('Trámite familiar')">Trámite familiar</button>
+  </div>
+  <input class="campo" id="motivo-otro" placeholder="Otro motivo (escribilo acá)" maxlength="150">
+  <button class="btn" onclick="elegirMotivo('Otro: ' + $('motivo-otro').value.trim())">Continuar con otro motivo</button>
+  <button class="btn sec" onclick="reiniciar()">Cancelar</button>
+  <div class="error" id="motivo-error"></div>
+</div>
+
+<!-- 3. Foto -->
+<div class="pant" id="p-foto">
+  <h1 id="foto-titulo">Sacate una foto</h1>
+  <div class="sub">Mirá a la cámara</div>
+  <video id="video" autoplay playsinline muted></video>
+  <img id="previa" alt="">
+  <button class="btn" id="btn-sacar" onclick="sacarFoto()">Sacar foto</button>
+  <button class="btn sec" onclick="reiniciar()">Cancelar</button>
+  <div class="cargando" id="foto-cargando"></div>
+  <div class="error" id="foto-error"></div>
+</div>
+
+<!-- 4. Listo -->
+<div class="pant" id="p-ok">
+  <div class="ok">✓</div>
+  <h1 id="ok-texto">Listo</h1>
+  <div class="sub" id="ok-sub"></div>
+</div>
+
+<!-- 5. Panel de socios -->
+<div class="pant" id="p-admin">
+  <div class="logo">PANEL DE SOCIOS</div>
+  <div class="tabs">
+    <button class="tab on" id="tab-reg" onclick="verTab('reg')">Registro</button>
+    <button class="tab" id="tab-emp" onclick="verTab('emp')">Empleados</button>
+    <button class="tab" id="tab-eq" onclick="verTab('eq')">Equipos</button>
+  </div>
+  <div class="panel" id="sec-reg">
+    <div class="filtros">
+      <input type="date" id="f-desde">
+      <input type="date" id="f-hasta">
+      <select id="f-emp"><option value="">Todos</option></select>
+      <label><input type="checkbox" id="f-obs"> Solo con observaciones</label>
+      <button class="chico" onclick="cargarRegistro()">Buscar</button>
+      <button class="chico sec" onclick="exportar()">Exportar a Excel</button>
+    </div>
+    <div class="cargando" id="reg-cargando"></div>
+    <div class="tabla"><table><thead><tr><th>Fecha</th><th>Hora</th><th>Empleado</th><th>Tipo</th><th>Observación</th><th>Foto</th></tr></thead><tbody id="reg-body"></tbody></table></div>
+  </div>
+  <div class="panel" id="sec-emp" style="display:none">
+    <div class="cargando" id="emp-cargando"></div>
+    <div class="error" id="emp-error"></div>
+    <div id="emp-lista"></div>
+    <div class="card alta" style="display:block">
+      <b>Agregar empleado</b><br><br>
+      <input id="a-nombre" placeholder="Nombre y apellido">
+      <select id="a-rol"><option>Operario de depósito</option><option>Administrativo</option><option>Mando medio</option><option>Socio</option></select>
+      <input id="a-pin" placeholder="PIN (4 números)" inputmode="numeric" maxlength="4">
+      <button class="chico" onclick="altaEmpleado()">Agregar</button>
+    </div>
+  </div>
+  <div class="panel" id="sec-eq" style="display:none">
+    <div class="sub" style="text-align:left;max-width:none">Estos son los equipos desde donde se puede fichar. Si das de baja uno, deja de funcionar al instante.</div>
+    <div class="cargando" id="eq-cargando"></div>
+    <div id="eq-lista"></div>
+  </div>
+  <button class="btn sec" onclick="reiniciar()">Salir</button>
+</div>
+
+<div class="modal-fondo" id="modal"><div class="modal">
+  <p id="modal-texto"></p>
+  <div id="modal-botones"></div>
+</div></div>
+
+<script>
+var API_URL = 'https://script.google.com/macros/s/AKfycbyNdSAHeZXNV7y7fIIG0O-5uS_PquQfM1MR5CZKxbXkpQUap5dGvIYI7zvQC5PNfQMW/exec';
+var CLAVE_EQUIPO = 'umpapel_equipo';
+
+var pin = '', sesion = null, tipoElegido = null, motivo = '', pinAutoriza = '', stream = null, ubic = '';
+var timerSalir = null, ultimosDatos = [], tLogin = 0;
+
+function $(id) { return document.getElementById(id); }
+function ver(id) {
+  document.querySelectorAll('.pant').forEach(function (p) { p.classList.remove('on'); });
+  $(id).classList.add('on');
+  window.scrollTo(0, 0);
+}
+function leerToken() { try { return localStorage.getItem(CLAVE_EQUIPO) || ''; } catch (e) { return ''; } }
+function guardarToken(t) { try { localStorage.setItem(CLAVE_EQUIPO, t); } catch (e) {} }
+function borrarToken() { try { localStorage.removeItem(CLAVE_EQUIPO); } catch (e) {} }
+
+function api(accion, datos) {
+  datos = datos || {};
+  datos.accion = accion;
+  datos.token = leerToken();
+  return fetch(API_URL, { method: 'POST', body: JSON.stringify(datos) })
+    .then(function (r) { return r.json(); })
+    .catch(function () { throw new Error('Sin conexión. Revisá internet y probá de nuevo.'); })
+    .then(function (r) {
+      if (!r.ok) {
+        if (r.error === 'EQUIPO_NO_REGISTRADO') { borrarToken(); reiniciar(); throw new Error('Este equipo no está registrado'); }
+        throw new Error(r.error);
+      }
+      return r.data;
+    });
+}
+
+function modal(texto, botones) {
+  $('modal-texto').textContent = texto;
+  var cont = $('modal-botones');
+  cont.innerHTML = '';
+  botones.forEach(function (b) {
+    var el = document.createElement('button');
+    el.className = 'btn' + (b.sec ? ' sec' : '');
+    el.textContent = b.texto;
+    el.onclick = function () { $('modal').classList.remove('on'); b.accion(); };
+    cont.appendChild(el);
+  });
+  $('modal').classList.add('on');
+}
+
+// ----- Inicio y registro del equipo -----
+function inicio() {
+  if (!leerToken()) { ver('p-registro'); return; }
+  ver('p-pin');
+  api('estadoEquipo').then(function (r) { if (!r.registrado) { borrarToken(); ver('p-registro'); } }).catch(function () {});
+}
+
+function registrarEquipo() {
+  $('r-error').textContent = '';
+  $('r-cargando').textContent = 'Registrando...';
+  api('registrarEquipo', { nombre: $('r-nombre').value, pinSocio: $('r-pin').value }).then(function (r) {
+    guardarToken(r.token);
+    $('r-cargando').textContent = '';
+    $('r-pin').value = '';
+    ver('p-pin');
+  }).catch(function (e) { $('r-cargando').textContent = ''; $('r-error').textContent = e.message; });
+}
+
+// ----- Teclado PIN -----
+(function () {
+  var t = $('teclado');
+  ['1','2','3','4','5','6','7','8','9','borrar','0',''].forEach(function (k) {
+    var b = document.createElement('button');
+    b.className = 'tecla' + (k === 'borrar' || k === '' ? ' gris' : '');
+    b.textContent = k === 'borrar' ? '⌫ Borrar' : k;
+    if (k === '') b.style.visibility = 'hidden';
+    b.onclick = function () { tecla(k); };
+    t.appendChild(b);
+  });
+})();
+
+function pintarPuntos() {
+  var ps = $('puntos').children;
+  for (var i = 0; i < 4; i++) ps[i].classList.toggle('lleno', i < pin.length);
+}
+
+function tecla(k) {
+  if ($('pin-cargando').textContent) return;
+  $('pin-error').textContent = '';
+  if (k === 'borrar') { pin = pin.slice(0, -1); pintarPuntos(); return; }
+  if (pin.length >= 4) return;
+  pin += k;
+  pintarPuntos();
+  if (pin.length === 4) entrar();
+}
+
+document.addEventListener('keydown', function (ev) {
+  if ($('modal').classList.contains('on')) return;
+  if (!$('p-pin').classList.contains('on')) return;
+  if (ev.target && /INPUT|SELECT|TEXTAREA/.test(ev.target.tagName)) return;
+  if (/^[0-9]$/.test(ev.key)) { ev.preventDefault(); tecla(ev.key); }
+  else if (ev.key === 'Backspace' || ev.key === 'Delete') { ev.preventDefault(); tecla('borrar'); }
+});
+
+function entrar() {
+  $('pin-cargando').textContent = 'Verificando...';
+  api('login', { pin: pin }).then(function (r) {
+    $('pin-cargando').textContent = '';
+    sesion = r;
+    tLogin = Date.now();
+    $('saludo').textContent = 'Hola, ' + r.nombre.split(' ')[0];
+    $('ultimo').textContent = r.ultimo ? 'Último registro: ' + r.ultimo : '';
+    $('olvido').style.display = r.olvido ? 'block' : 'none';
+    $('olvido').textContent = r.olvido ? '⚠ ' + r.olvido + '. Queda registrado para que lo revise un socio.' : '';
+    $('btn-admin').style.display = r.socio ? 'block' : 'none';
+    dibujarTipos(r.permitidos, false);
+    ver('p-tipo');
+    pedirUbicacion();
+    programarSalida(60);
+  }).catch(function (e) {
+    $('pin-cargando').textContent = '';
+    $('pin-error').textContent = e.message;
+    pin = ''; pintarPuntos();
+  });
+}
+
+function pedirUbicacion() {
+  ubic = '';
+  if (!navigator.geolocation) return;
+  try {
+    navigator.geolocation.getCurrentPosition(function (p) {
+      ubic = p.coords.latitude.toFixed(6) + ', ' + p.coords.longitude.toFixed(6);
+    }, function () {}, { timeout: 8000, maximumAge: 300000 });
+  } catch (e) {}
+}
+
+// ----- Tipos de fichaje -----
+var TODOS = ['Entrada', 'Inicio pausa', 'Fin pausa', 'Salida', 'Retiro justificado'];
+
+function dibujarTipos(lista, conAutorizacion) {
+  var cont = $('tipos');
+  cont.innerHTML = '';
+  cont.className = 'tipos' + (lista.length === 1 ? ' uno' : '');
+  lista.forEach(function (t) {
+    var b = document.createElement('button');
+    b.className = 'tipo t-' + t.split(' ')[0];
+    b.textContent = t;
+    b.onclick = function () { elegirTipo(t, conAutorizacion); };
+    cont.appendChild(b);
+  });
+  $('btn-otra').style.display = conAutorizacion ? 'none' : 'block';
+}
+
+function mostrarTodos() {
+  var otros = TODOS.filter(function (t) { return sesion.permitidos.indexOf(t) < 0; });
+  $('ultimo').textContent = 'Estas opciones necesitan el PIN de un socio';
+  dibujarTipos(otros, true);
+  programarSalida(60);
+}
+
+function minutosAhora() { return sesion.ahoraMin + Math.floor((Date.now() - tLogin) / 60000); }
+
+function elegirTipo(t, conAutorizacion) {
+  tipoElegido = t; motivo = ''; pinAutoriza = '';
+  programarSalida(90);
+  if (conAutorizacion) {
+    $('aut-texto').textContent = sesion.nombre + ' quiere fichar "' + t + '" fuera del orden habitual.';
+    $('aut-pin').value = ''; $('aut-error').textContent = '';
+    ver('p-autoriza');
+    setTimeout(function () { $('aut-pin').focus(); }, 100);
+    return;
+  }
+  chequearHorario();
+}
+
+function confirmarAutoriza() {
+  var p = $('aut-pin').value.trim();
+  if (!/^\d{4}$/.test(p)) { $('aut-error').textContent = 'Ingresá el PIN de 4 números'; return; }
+  pinAutoriza = p;
+  chequearHorario();
+}
+
+function chequearHorario() {
+  var h = sesion.horario, m = minutosAhora();
+  if (tipoElegido === 'Entrada' && (m < h.entradaDesde || m > h.entradaHasta)) {
+    modal('El horario de ingreso es diferente al establecido (' + h.entrada + ' hs). ¿Querés continuar?', [
+      { texto: 'Sí, continuar', accion: siguientePaso },
+      { texto: 'Cancelar', sec: true, accion: reiniciar }
+    ]);
+    return;
+  }
+  if (tipoElegido === 'Salida' && m < h.salida) {
+    var botones = [{ texto: 'Sí, continuar', accion: siguientePaso }];
+    if (sesion.permitidos.indexOf('Retiro justificado') >= 0 || pinAutoriza) {
+      botones.push({ texto: 'Cambiar a retiro justificado', sec: true, accion: function () { tipoElegido = 'Retiro justificado'; siguientePaso(); } });
+    }
+    botones.push({ texto: 'Cancelar', sec: true, accion: reiniciar });
+    modal('Estás saliendo antes del horario establecido (' + h.salidaTxt + ' hs). ¿Querés continuar?', botones);
+    return;
+  }
+  siguientePaso();
+}
+
+function siguientePaso() {
+  if (tipoElegido === 'Retiro justificado') {
+    $('motivo-otro').value = ''; $('motivo-error').textContent = '';
+    ver('p-motivo');
+    return;
+  }
+  abrirFoto();
+}
+
+function elegirMotivo(m) {
+  if (m === 'Otro: ') { $('motivo-error').textContent = 'Escribí el motivo'; return; }
+  motivo = m;
+  abrirFoto();
+}
+
+// ----- Foto (solo cámara en vivo) -----
+function abrirFoto() {
+  $('foto-titulo').textContent = tipoElegido + ': sacate una foto';
+  $('foto-error').textContent = '';
+  $('foto-cargando').textContent = '';
+  $('btn-sacar').disabled = true;
+  $('previa').style.display = 'none';
+  $('video').style.display = 'block';
+  ver('p-foto');
+  programarSalida(90);
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { errorCamara({ name: 'SecurityError' }); return; }
+  navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 960 } }, audio: false })
+    .then(function (s) {
+      stream = s;
+      $('video').srcObject = s;
+      $('btn-sacar').disabled = false;
+    })
+    .catch(errorCamara);
+}
+
+function errorCamara(err) {
+  $('video').style.display = 'none';
+  var n = err && err.name ? err.name : '';
+  var msg;
+  if (n === 'NotFoundError' || n === 'OverconstrainedError') msg = 'No se encontró ninguna cámara en este equipo. Conectá una webcam y tocá "Reintentar".';
+  else if (n === 'NotAllowedError' || n === 'SecurityError') msg = 'El navegador o Windows no dejan usar la cámara. Tocá el candado a la izquierda de la dirección, poné Cámara en "Permitir" y revisá en Windows: Configuración > Privacidad > Cámara.';
+  else if (n === 'NotReadableError' || n === 'AbortError') msg = 'La cámara está siendo usada por otro programa (Zoom, Meet, WhatsApp, etc.). Cerralo y tocá "Reintentar".';
+  else msg = 'No se pudo usar la cámara' + (n ? ' (' + n + ')' : '') + '. Tocá "Reintentar".';
+  $('foto-error').textContent = msg;
+  $('btn-sacar').disabled = false;
+  $('btn-sacar').textContent = 'Reintentar';
+  $('btn-sacar').onclick = function () { $('btn-sacar').textContent = 'Sacar foto'; $('btn-sacar').onclick = sacarFoto; abrirFoto(); };
+}
+
+function cerrarCamara() {
+  if (stream) { stream.getTracks().forEach(function (t) { t.stop(); }); stream = null; }
+}
+
+function sacarFoto() {
+  var v = $('video');
+  if (!v.videoWidth) { $('foto-error').textContent = 'La cámara todavía no está lista'; return; }
+  var max = 640, esc = Math.min(1, max / Math.max(v.videoWidth, v.videoHeight));
+  var c = document.createElement('canvas');
+  c.width = Math.round(v.videoWidth * esc); c.height = Math.round(v.videoHeight * esc);
+  var ctx = c.getContext('2d');
+  ctx.translate(c.width, 0); ctx.scale(-1, 1);
+  ctx.drawImage(v, 0, 0, c.width, c.height);
+  var data = c.toDataURL('image/jpeg', 0.7);
+  $('previa').src = data; $('previa').style.display = 'block'; v.style.display = 'none';
+  cerrarCamara();
+  enviar(data);
+}
+
+function enviar(foto) {
+  $('btn-sacar').disabled = true;
+  $('foto-cargando').textContent = 'Guardando...';
+  api('fichar', { pin: pin, tipo: tipoElegido, foto: foto, ubicacion: ubic, motivo: motivo, pinAutoriza: pinAutoriza }).then(function (r) {
+    $('ok-texto').textContent = r.tipo + ' registrada';
+    $('ok-sub').textContent = r.nombre + ' · ' + r.hora + ' hs' + (r.obs ? ' · ' + r.obs : '');
+    ver('p-ok');
+    programarSalida(r.obs ? 5 : 3);
+  }).catch(function (e) {
+    $('foto-cargando').textContent = '';
+    $('foto-error').textContent = e.message + '. Probá de nuevo.';
+    if (/PIN|socio/i.test(e.message) && pinAutoriza) {
+      setTimeout(function () { $('aut-pin').value = ''; $('aut-error').textContent = e.message; ver('p-autoriza'); }, 1500);
+      return;
+    }
+    abrirFoto();
+  });
+}
+
+function programarSalida(seg) {
+  clearTimeout(timerSalir);
+  timerSalir = setTimeout(reiniciar, seg * 1000);
+}
+
+function reiniciar() {
+  clearTimeout(timerSalir);
+  cerrarCamara();
+  $('modal').classList.remove('on');
+  pin = ''; sesion = null; tipoElegido = null; motivo = ''; pinAutoriza = ''; ubic = '';
+  pintarPuntos();
+  $('btn-sacar').textContent = 'Sacar foto'; $('btn-sacar').onclick = sacarFoto;
+  $('pin-error').textContent = ''; $('pin-cargando').textContent = '';
+  if (!leerToken()) { ver('p-registro'); return; }
+  ver('p-pin');
+}
+
+// ----- Panel de socios -----
+function abrirAdmin() {
+  ver('p-admin');
+  var hoy = new Date(), ini = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+  $('f-desde').value = iso(ini); $('f-hasta').value = iso(hoy);
+  verTab('reg');
+  cargarEmpleados();
+  cargarRegistro();
+  cargarEquipos();
+  programarSalida(300);
+}
+function iso(d) { return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
+document.addEventListener('click', function () { if ($('p-admin').classList.contains('on')) programarSalida(300); });
+document.addEventListener('keydown', function () { if ($('p-admin').classList.contains('on')) programarSalida(300); });
+
+function verTab(t) {
+  ['reg', 'emp', 'eq'].forEach(function (x) {
+    $('tab-' + x).classList.toggle('on', x === t);
+    $('sec-' + x).style.display = x === t ? 'block' : 'none';
+  });
+}
+
+function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+
+function cargarEmpleados() {
+  $('emp-cargando').textContent = 'Cargando...';
+  api('adminEmpleados', { pin: pin }).then(function (lista) {
+    $('emp-cargando').textContent = '';
+    var sel = $('f-emp'), actual = sel.value, opciones = '<option value="">Todos</option>', html = '';
+    lista.forEach(function (e, i) {
+      opciones += '<option>' + esc(e.nombre) + '</option>';
+      html += '<div class="card"><div class="n">' + esc(e.nombre) + '<span class="r">' + esc(e.rol) + (e.activo ? '' : ' · INACTIVO') + '</span></div>' +
+        '<input id="pin-' + i + '" value="' + esc(e.pin) + '" inputmode="numeric" maxlength="4">' +
+        '<button class="chico" onclick="cambiarPin(' + i + ')">Guardar PIN</button>' +
+        '<button class="chico sec" onclick="cambiarActivo(' + i + ',' + (!e.activo) + ')">' + (e.activo ? 'Dar de baja' : 'Reactivar') + '</button></div>';
+    });
+    sel.innerHTML = opciones; sel.value = actual;
+    $('emp-lista').innerHTML = html;
+    window._emps = lista;
+  }).catch(errorEmp);
+}
+function errorEmp(e) { $('emp-cargando').textContent = ''; $('emp-error').textContent = e.message; }
+
+function cambiarPin(i) {
+  $('emp-error').textContent = '';
+  var e = window._emps[i];
+  api('adminCambiarPin', { pin: pin, nombre: e.nombre, nuevo: $('pin-' + i).value.trim() })
+    .then(function () { cargarEmpleados(); setTimeout(function () { $('emp-cargando').textContent = '✓ PIN de ' + e.nombre + ' actualizado'; }, 900); })
+    .catch(errorEmp);
+}
+function cambiarActivo(i, activo) {
+  $('emp-error').textContent = '';
+  api('adminActivo', { pin: pin, nombre: window._emps[i].nombre, activo: activo }).then(cargarEmpleados).catch(errorEmp);
+}
+function altaEmpleado() {
+  $('emp-error').textContent = '';
+  api('adminAlta', { pin: pin, nombre: $('a-nombre').value, rol: $('a-rol').value, nuevo: $('a-pin').value }).then(function () {
+    $('a-nombre').value = ''; $('a-pin').value = '';
+    cargarEmpleados();
+  }).catch(errorEmp);
+}
+
+function cargarRegistro() {
+  $('reg-cargando').textContent = 'Cargando...';
+  api('adminFichajes', { pin: pin, desde: $('f-desde').value, hasta: $('f-hasta').value, empleado: $('f-emp').value, soloObs: $('f-obs').checked }).then(function (r) {
+    ultimosDatos = r.filas;
+    $('reg-cargando').textContent = r.filas.length + ' registros';
+    $('reg-body').innerHTML = r.filas.map(function (f) {
+      var obs = [f.obs, f.motivo ? 'Motivo: ' + f.motivo : ''].filter(Boolean).join(' · ');
+      return '<tr><td>' + esc(f.fecha) + '</td><td>' + esc(f.hora) + '</td><td>' + esc(f.empleado) + '</td><td>' + esc(f.tipo) + '</td><td class="obs">' + esc(obs) + '</td><td>' +
+        (f.foto ? '<a href="' + esc(f.foto) + '" target="_blank" rel="noopener">Ver</a>' : '') + '</td></tr>';
+    }).join('');
+  }).catch(function (e) { $('reg-cargando').textContent = e.message; });
+}
+
+function cargarEquipos() {
+  $('eq-cargando').textContent = 'Cargando...';
+  api('adminEquipos', { pin: pin }).then(function (lista) {
+    $('eq-cargando').textContent = '';
+    $('eq-lista').innerHTML = lista.map(function (q) {
+      return '<div class="card"><div class="n">' + esc(q.nombre) + (q.este ? ' (este equipo)' : '') +
+        '<span class="r">Registró ' + esc(q.por) + ' · ' + esc(q.fecha) + (q.activo ? '' : ' · DADO DE BAJA') + '</span></div>' +
+        (q.activo ? '<button class="chico sec" onclick="bajaEquipo(' + q.fila + ',' + q.este + ')">Dar de baja</button>' : '') + '</div>';
+    }).join('') || '<div class="sub">No hay equipos registrados</div>';
+  }).catch(function (e) { $('eq-cargando').textContent = e.message; });
+}
+
+function bajaEquipo(fila, esEste) {
+  modal(esEste ? 'Vas a dar de baja ESTE equipo. Después no se va a poder fichar desde acá hasta registrarlo de nuevo. ¿Seguro?' : '¿Dar de baja este equipo? No se va a poder fichar desde ahí.', [
+    { texto: 'Sí, dar de baja', accion: function () { api('adminBajaEquipo', { pin: pin, fila: fila }).then(function () { if (esEste) { borrarToken(); reiniciar(); } else cargarEquipos(); }).catch(function (e) { $('eq-cargando').textContent = e.message; }); } },
+    { texto: 'Cancelar', sec: true, accion: function () {} }
+  ]);
+}
+
+function exportar() {
+  var filas = [['Fecha', 'Hora', 'Empleado', 'Tipo', 'Observación', 'Motivo', 'Autorizó', 'Equipo', 'Ubicación', 'Foto']];
+  ultimosDatos.forEach(function (f) { filas.push([f.fecha, f.hora, f.empleado, f.tipo, f.obs, f.motivo, f.autorizo, f.equipo, f.ubicacion, f.foto]); });
+  var csv = '﻿' + filas.map(function (r) {
+    return r.map(function (c) { return '"' + String(c == null ? '' : c).replace(/"/g, '""') + '"'; }).join(';');
+  }).join('\r\n');
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+  a.download = 'fichajes_' + $('f-desde').value + '_a_' + $('f-hasta').value + '.csv';
+  document.body.appendChild(a); a.click(); a.remove();
+}
+
+inicio();
+</script>
+</body>
+</html>
